@@ -49,7 +49,6 @@ function loadTowns() {
         return 0;
       });
     });
-  // .then(towns => towns.map(town => town.name))
 }
 
 /*
@@ -82,21 +81,26 @@ const filterResult = homeworkContainer.querySelector('#filter-result');
 
 let loadedTowns = [];
 
-filterBlock.style.display = 'none';
-loadingFailedBlock.style.display = 'none';
-loadTowns()
-  .then((towns) => {
-    loadedTowns = towns;
-    loadingBlock.style.display = 'none';
-    filterBlock.style.display = 'block';
-  })
-  .catch(() => {
-    loadingBlock.style.display = 'none';
-    loadingFailedBlock.style.display = 'block';
-  });
+function pageLoad() {
+  loadingBlock.style.display = 'block';
+  filterBlock.style.display = 'none';
+  loadingFailedBlock.style.display = 'none';
+  loadTowns()
+    .then((towns) => {
+      loadedTowns = towns;
+      loadingBlock.style.display = 'none';
+      filterBlock.style.display = 'block';
+    })
+    .catch(() => {
+      loadingBlock.style.display = 'none';
+      loadingFailedBlock.style.display = 'block';
+    });
+}
+
+pageLoad();
 
 retryButton.addEventListener('click', () => {
-  document.location.reload();
+  pageLoad();
 });
 
 filterInput.addEventListener('input', function (event) {
