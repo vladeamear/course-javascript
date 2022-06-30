@@ -39,7 +39,18 @@ const homeworkContainer = document.querySelector('#app');
  Массив городов пожно получить отправив асинхронный запрос по адресу
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
-function loadTowns() {}
+function loadTowns() {
+  return fetch('https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json')
+    .then((response) => response.json())
+    .then((cities) => {
+      return cities.sort((a, b) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+      });
+    });
+  // .then(towns => towns.map(town => town.name))
+}
 
 /*
  Функция должна проверять встречается ли подстрока chunk в строке full
@@ -52,7 +63,9 @@ function loadTowns() {}
    isMatching('Moscow', 'SCO') // true
    isMatching('Moscow', 'Moscov') // false
  */
-function isMatching(full, chunk) {}
+function isMatching(full, chunk) {
+  return `${full}`.toLowerCase().includes(`${chunk}`.toLowerCase());
+}
 
 /* Блок с надписью "Загрузка" */
 const loadingBlock = homeworkContainer.querySelector('#loading-block');
@@ -67,8 +80,34 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
-retryButton.addEventListener('click', () => {});
+let loadedTowns = [];
 
-filterInput.addEventListener('input', function () {});
+filterBlock.style.display = 'none';
+loadingFailedBlock.style.display = 'none';
+loadTowns()
+  .then((towns) => {
+    loadedTowns = towns;
+    loadingBlock.style.display = 'none';
+    filterBlock.style.display = 'block';
+  })
+  .catch(() => {
+    loadingBlock.style.display = 'none';
+    loadingFailedBlock.style.display = 'block';
+  });
+
+retryButton.addEventListener('click', () => {
+  document.location.reload();
+});
+
+filterInput.addEventListener('input', function (event) {
+  filterResult.innerHTML = '';
+  for (const town of loadedTowns) {
+    if (isMatching(town.name, event.target.value) && event.target.value !== '') {
+      const p = document.createElement('P');
+      p.textContent = town.name;
+      filterResult.append(p);
+    }
+  }
+});
 
 export { loadTowns, isMatching };
