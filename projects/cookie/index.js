@@ -45,8 +45,82 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('input', function () {});
+function generateTr(name, value) {
+  const tr = document.createElement('TR');
+  tr.id = name;
+  const td1 = document.createElement('TD');
+  td1.innerText = name;
+  const td2 = document.createElement('TD');
+  td2.innerText = value;
+  const td3 = document.createElement('TD');
+  const deleteBtn = document.createElement('BUTTON');
+  deleteBtn.innerText = 'Удалить';
+  td3.appendChild(deleteBtn);
+  tr.append(td1, td2, td3);
+  return tr;
+}
 
-addButton.addEventListener('click', () => {});
+function generateTBody(cookies) {
+  // console.log(document.cookie);
+  if (cookies) {
+    for (const cooka of cookies) {
+      const [name, value] = cooka.split('=');
+      listTable.appendChild(generateTr(name, value));
+    }
+  }
+}
 
-listTable.addEventListener('click', (e) => {});
+const cookies = document.cookie ? document.cookie.split('; ') : undefined;
+
+generateTBody(cookies);
+
+filterNameInput.addEventListener('input', function () {
+  const filter = filterNameInput.value.toLowerCase();
+  const filteredCookies = [];
+  document.cookie.split('; ').forEach((str) => {
+    if (
+      str.split('=')[1].toLowerCase().includes(filter) ||
+      str.split('=')[0].toLowerCase().includes(filter)
+    )
+      filteredCookies.push(str);
+  });
+  listTable.innerHTML = '';
+  generateTBody(filteredCookies);
+});
+
+addButton.addEventListener('click', () => {
+  const name = addNameInput.value;
+  const value = addValueInput.value;
+  const filter = filterNameInput.value.toLowerCase();
+
+  const targetTr = listTable.querySelector(`#${name}`);
+
+  if (targetTr) {
+    if (
+      !filter ||
+      value.toLowerCase().includes(filter) ||
+      name.toLowerCase().includes(filter)
+    ) {
+      targetTr.querySelectorAll('TD')[1].textContent = value;
+    } else {
+      targetTr.remove();
+    }
+  } else {
+    if (
+      !filter ||
+      value.toLowerCase().includes(filter) ||
+      name.toLowerCase().includes(filter)
+    ) {
+      listTable.appendChild(generateTr(name, value));
+    }
+  }
+  document.cookie = `${name}=${value}`;
+});
+
+listTable.addEventListener('click', (e) => {
+  const tr = e.target.tagName === 'BUTTON' ? e.target.parentNode.parentNode : null;
+  if (tr) {
+    document.cookie = `${tr.id}=; expires = Thu, 01 Jan 1970 00:00:00 GMT`;
+    tr.remove();
+  }
+});
